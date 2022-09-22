@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>React Calculator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <style>
+            .calculator {
+                border: 1px solid #111;
+                width: 30%;
+                margin: auto;
+                background: #2C3E50;
+                color: #fff;
+                font-family: verdana, sans-serif;
+              }
+              
+              .display {
+                  padding: 2px 0;
+              }
+              
+              .calculator-con {
+                  display: flex;
+                  align-items: stretch;
+                  justify-content: center;
+                  flex-direction: column;
+              }
+              
+              .output {
+                  display: flex;
+                  align-items: stretch;
+                  justify-content: center;
+                  flex-direction: column;
+              }
+              
+              .output > span {
+                  height: 30px;
+                  width: 100%;
+                  text-align: right;
+              }
+              
+              
+              #clear { grid-area: ac; }
+              #multiply { grid-area: multiplication; }
+              #divide { grid-area: divide; }
+              #subtract { grid-area: minus; }
+              #add { grid-area: plus; }
+              #equals { grid-area: equals; }
+              #decimal { grid-area: decimal-point; }
+              #zero { grid-area: zero-val; }
+              #one { grid-area: one; }
+              #two { grid-area: two; }
+              #three { grid-area: three; }
+              #four { grid-area: four; }
+              #five { grid-area: five; }
+              #six { grid-area: six; }
+              #seven { grid-area: seven; }
+              #eight { grid-area: eight; }
+              #nine { grid-area: nine; } 
+              
+              .keys {
+                  display: grid;
+                  grid-template-columns: repeat(4, 1fr);
+                  grid-template-rows: auto;
+                  grid-gap: 2px;
+                  grid-template-areas:
+                      "ac ac divide multiplication"
+                      "seven eight nine minus"
+                      "four five six plus"
+                      "one two three equals"
+                      "zero-val zero-val decimal-point equals"
+                  ;
+              }
+              
+              button {
+                padding: 10px;
+                background-color: #F0F3F4;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+              }
+              
+              #clear, #divide, #multiply, #subtract, #add, #equals {
+                background: #E74C3C;
+                color: #fff;
+              }
+              
+              button:active {
+                   background: #F4D03F;
+                  color: #fff;
+              }
+              
+        </style>
+    </head>
+    <body>
+        <div id="app">
+
+        </div>
+    </body>
+</html>
+
+<script type="text/babel">
+
+const calcData = [
+  { id: "clear", value: "AC" },
+  { id: "divide", value: "/" },
+  { id: "multiply", value: "x" },
+  { id: "seven", value: 7 },
+  { id: "eight", value: 8 },
+  { id: "nine", value: 9 },
+  { id: "subtract", value: "-" },
+  { id: "four", value: 4 },
+  { id: "five", value: 5 },
+  { id: "six", value: 6 },
+  { id: "add", value: "+" },
+  { id: "one", value: 1 },
+  { id: "two", value: 2 },
+  { id: "three", value: 3 },
+  { id: "equals", value: "=" },
+  { id: "zero", value: 0 },
+  { id: "decimal", value: "." },
+];
+
+const operators = ["AC", "/", "x", "+", "-", "="];
+
+const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+const Display = ({ input, output }) => (
+  <div className="output">
+    <span className="result">{output}</span>
+    <span id="display" className="input">{input}</span>
+  </div>
+);
+
+const Key = ({ keyData: { id, value }, handleInput }) => (
+  <button id={id} onClick={() => handleInput(value)}>
+    {value}
+  </button>
+);
+
+const Keyboard = ({ handleInput }) => (
+  <div className="keys">
+    {calcData.map((key) => (
+      <Key key={key.id} keyData={key} handleInput={handleInput} />
+    ))}
+  </div>
+);
+
+const App = () => {
+const [input, setInput] = React.useState("0");
+const [output, setOutput] = React.useState("");
+const [calculatorData, setCalculatorData] = React.useState("");
+
+  const handleSubmit = () => {
+    console.log({ calculatorData });
+
+    const total = eval(calculatorData);
+    setInput(total);
+    setOutput(`${total} = ${total}`);
+    setCalculatorData(`${total}`);
+  };
+
+  const handleClear = () => {
+    setInput("0");
+    setCalculatorData("");
+  };
+
+  const handleNumbers = (value) => {
+    if (!calculatorData.length) {
+      setInput(`${value}`);
+      setCalculatorData(`${value}`);
+    } else {
+      if (value === 0 && (calculatorData === "0" || input === "0")) {
+        setCalculatorData(`${calculatorData}`);
+      } else {
+        const lastChat = calculatorData.charAt(calculatorData.length - 1);
+        const isLastChatOperator =
+          lastChat === "*" || operators.includes(lastChat);
+
+        setInput(isLastChatOperator ? `${value}` : `${input}${value}`);
+        setCalculatorData(`${calculatorData}${value}`);
+      }
+    }
+  };
+
+  const dotOperator = () => {
+    const lastChat = calculatorData.charAt(calculatorData.length - 1);
+    if (!calculatorData.length) {
+      setInput("0.");
+      setCalculatorData("0.");
+    } else {
+      if (lastChat === "*" || operators.includes(lastChat)) {
+        setInput("0.");
+        setCalculatorData(`${calculatorData} 0.`);
+      } else {
+        setInput(
+          lastChat === "." || input.includes(".") ? `${input}` : `${input}.`
+        );
+        const formattedValue =
+          lastChat === "." || input.includes(".")
+            ? `${calculatorData}`
+            : `${calculatorData}.`;
+        setCalculatorData(formattedValue);
+      }
+    }
+  };
+
+
+  const handleOperators = (value) => {
+    if (calculatorData.length) {
+      setInput(`${value}`);
+      const beforeLastChat = calculatorData.charAt(calculatorData.length - 2);
+
+      const beforeLastChatIsOperator =
+        operators.includes(beforeLastChat) || beforeLastChat === "*";
+
+      const lastChat = calculatorData.charAt(calculatorData.length - 1);
+      
+      const lastChatIsOperator = operators.includes(lastChat) || lastChat === "*";
+      
+      const validOp = value === "x" ? "*" : value;
+      if (
+        (lastChatIsOperator && value !== "-") ||
+        beforeLastChatIsOperator && lastChatIsOperator
+      ) {
+        if (beforeLastChatIsOperator) {
+          const updatedValue = `${calculatorData.substring(
+            0,
+            calculatorData.length - 2
+          )}${value}`;
+          setCalculatorData(updatedValue);
+        } else {
+          setCalculatorData(`${calculatorData.substring(0, calculatorData.length - 1)}${validOp}`);
+        }
+      } else {
+        setCalculatorData(`${calculatorData}${validOp}`);
+      }
+    }
+  };
+
+  const handleInput = (value) => {
+    const number = numbers.find((num) => num === value);
+    const operator = operators.find((op) => op === value);
+
+    switch (value) {
+      case "=":
+        handleSubmit();
+        break;
+      case "AC":
+        handleClear();
+        break;
+      case number:
+        handleNumbers(value);
+        break;
+      case ".":
+        dotOperator(value);
+        break;
+      case operator:
+        handleOperators(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleOutput = () => {
+    setOutput(calculatorData);
+  };
+
+  React.useEffect(() => {
+    handleOutput();
+  }, [calculatorData]);
+
+  return (
+    <div className="container">
+      <div className="calculator">
+        <Display input={input} output={output} />
+        <Keyboard handleInput={handleInput} />
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById("app"))
+
+</script>
+
+<script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
